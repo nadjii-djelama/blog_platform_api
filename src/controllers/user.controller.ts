@@ -87,4 +87,19 @@ const getUsers = async (req: Request, res: Response) => {
       .json({ message: "Internal server error", error: err.message });
   }
 };
-export { createUser, editUser, getUsers };
+
+const getSpecificUser = async (req: Request, res: Response) => {
+  try {
+    const user_id = req.params.id;
+    const find_user = await User.findById(user_id);
+    if (!find_user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+    res.status(200).json({ user: find_user });
+  } catch (err: any) {
+    res
+      .status(500)
+      .json({ message: "Internal server error.", error: err.message });
+  }
+};
+export { createUser, editUser, getUsers, getSpecificUser };

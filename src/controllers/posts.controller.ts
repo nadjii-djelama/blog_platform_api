@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import Posts from "../models/posts.model.ts";
-
+import Comment from "../models/comments.model.ts";
 const createPost = async (req: Request, res: Response) => {
   try {
     const { title, short_desc, content, author } = req.body;
@@ -23,4 +23,71 @@ const createPost = async (req: Request, res: Response) => {
   }
 };
 
-export { createPost };
+const editPost = async (req: Request, res: Response) => {
+  try {
+    const { title, short_desc, content } = req.body;
+    const post_id = req.params.id;
+    const find_post = await Posts.findById(post_id);
+    if (!find_post) {
+      return res.status(404).json({ message: "Post not found." });
+    }
+    if (title) find_post.title = title;
+    if (short_desc) find_post.short_desc = short_desc;
+    if (content) find_post.content = content;
+    const updated_post = await find_post.save();
+    res.status(200).json({ message: "Post updated.", post: updated_post });
+  } catch (err: any) {
+    res
+      .status(500)
+      .json({ message: "Internal server error.", error: err.message });
+  }
+};
+
+const deletePost = async (req: Request, res: Response) => {
+  try {
+    const post_id = req.params.id;
+    const find_post = await Posts.findById(post_id);
+    if (!find_post) {
+      return res.status(404).json({ message: "Can't find post, try again." });
+    }
+    const delete_post = find_post.deleteOne();
+    res
+      .status(200)
+      .json({ message: "Post deleted succesfully.", post: delete_post });
+  } catch (err: any) {
+    res
+      .status(500)
+      .json({ message: "Internal server error.", error: err.message });
+  }
+};
+
+const getPosts = async (req: Request, res: Response) => {
+  try {
+    const posts = await Posts.find();
+    if (!posts || posts.length === 0) {
+      return res.status(404).json({ message: "No posts availible." });
+    }
+    res.status(200).json({ message: "Posts fetched succesfully.", posts });
+  } catch (err: any) {
+    res
+      .status(500)
+      .json({ message: "Internal server error.", error: err.message });
+  }
+};
+
+const getSpecificPost = async (req: Request, res: Response) => {
+  try {
+    const post_id = req.params.id;
+    const find_post = await Posts.findById(post_id);
+    if (!find_post) {
+      return res.status(404).json({ message: "Post not found." });
+    }
+    res.status(200).json({ post: find_post });
+  } catch (err: any) {
+    res
+      .status(500)
+      .json({ message: "Internal server error.", error: err.message });
+  }
+};
+
+export { createPost, editPost, deletePost, getPosts, getSpecificPost };

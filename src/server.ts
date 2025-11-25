@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import { envConfig } from "./config/envconfig.config.ts";
 import db_conection from "./config/dbconnection.config.ts";
+
+// Database connection
 await db_conection();
 const app = express();
 
