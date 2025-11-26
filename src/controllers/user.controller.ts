@@ -1,12 +1,14 @@
 import type { Request, Response } from "express";
 import User from "../models/user.model.ts";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { envConfig } from "../config/envconfig.config.ts";
 
 // Create user
-const createUser = async (req: Request, res: Response) => {
+const signUp = async (req: Request, res: Response) => {
   try {
-    const { name, email, password, retypePassword } = req.body;
-    if (!name || !email || !password || !retypePassword) {
+    const { user_name, email, password, retypePassword } = req.body;
+    if (!user_name || !email || !password || !retypePassword) {
       return res
         .status(400)
         .json({ message: "make sure you fill all the required fields." });
@@ -22,7 +24,7 @@ const createUser = async (req: Request, res: Response) => {
     }
     const hash_password = await bcrypt.hash(password, 10);
     const created_user = await User.create({
-      name,
+      user_name,
       email,
       password: hash_password,
     });
@@ -36,6 +38,48 @@ const createUser = async (req: Request, res: Response) => {
   }
 };
 
+// Login form
+const logIn = async (req: Request, res: Response) => {
+  try {
+    const { email, password, retype_password } = req.body;
+    if (!email || !password || !retype_password) {
+      return res.status(400).json({
+        message:
+          "make sure you fill the email and password and retype password fields.",
+      });
+    }
+    const find_user = await User.findOne({ email });
+    if (!find_user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+    if (password !== retype_password) {
+      return res.status(400).json({
+        message: "the retype password should be the same with password.",
+      });
+    }
+    const password_validation = await bcrypt.compare(
+      password,
+      find_user.password
+    );
+    if (!password_validation) {
+      return res.status(401).json({ message: "Invalid credeantials." });
+    }
+    const token = await jwt.sign(
+      { userId: find_user._id, email: find_user.email },
+      process.env.JWT_SECRET as string,
+      { expiresIn: "1d" }
+    );
+    res
+      .status(200)
+      .json({ message: "you're Logged in.", user: find_user, Token: token });
+  } catch (err: any) {
+    res
+      .status(500)
+      .json({ message: "Internal server error.", error: err.message });
+  }
+};
+
+// Edit user
 const editUser = async (req: Request, res: Response) => {
   try {
     const user_id = req.params.id;
@@ -48,7 +92,7 @@ const editUser = async (req: Request, res: Response) => {
         .json({ message: "User not found, try another one." });
     }
     // update the name and email
-    if (name) find_user.name = name;
+    if (name) find_user.user_name = name;
     if (email) find_user.email = email;
     // check if the password is edited and if it's right or not
     if (password) {
@@ -77,6 +121,7 @@ const editUser = async (req: Request, res: Response) => {
   }
 };
 
+// Get all users
 const getUsers = async (req: Request, res: Response) => {
   try {
     const users = await User.find();
@@ -88,6 +133,7 @@ const getUsers = async (req: Request, res: Response) => {
   }
 };
 
+// Get specific user
 const getSpecificUser = async (req: Request, res: Response) => {
   try {
     const user_id = req.params.id;
@@ -102,4 +148,5 @@ const getSpecificUser = async (req: Request, res: Response) => {
       .json({ message: "Internal server error.", error: err.message });
   }
 };
-export { createUser, editUser, getUsers, getSpecificUser };
+
+export { signUp, editUser, getUsers, getSpecificUser, logIn };

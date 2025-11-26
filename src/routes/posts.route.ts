@@ -9,14 +9,15 @@ import {
 } from "../controllers/posts.controller.ts";
 
 import { addComment } from "../controllers/comments.controller.ts";
-
+import authorization from "../middlewares/authorization.middleware.ts";
 // Post routes
-router.post("/create_post", createPost);
-router.put("/edit-post/:id", editPost);
-router.delete("/delete-post/:id", deletePost);
-router.get("/posts", getPosts);
-router.get("/post/:id", getSpecificPost);
+router.post("/create-post", authorization, createPost);
+router.put("/edit-post/:id", authorization, editPost);
+router.delete("/delete-post/:id", authorization, deletePost);
+router.get("/posts", authorization, getPosts);
+router.get("/post/:id", authorization, getSpecificPost);
 
 // Comment routes
-router.post("/post/:post_id/add-comment", addComment);
+router.post("/post/:post_id/add-comment", authorization, addComment);
+
 export default router;
