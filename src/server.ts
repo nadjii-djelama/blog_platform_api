@@ -18,6 +18,10 @@ import postRoute from "./routes/posts.route.ts";
 app.use("/api/v1", userRoute);
 app.use("/api/v1", postRoute);
 
+app.get("*", (req, res) => {
+  res.status(404).json({ message: "This is an Invalid page." });
+});
+
 //  Start server
 const port: number = Number(process.env.PORT) || 4000;
 app.listen(port, () => {
