@@ -25,6 +25,10 @@ router.get("/post/:id", authorization, getSpecificPost);
 // Comment routes
 router.post("/post/:post_id/add-comment", authorization, addComment as any);
 router.put("/post/:post_id/edit-comment/:id", authorization, editComment);
-router.post("/post/:post_id/delete-comment/:id", authorization, deleteComment);
+router.delete(
+  "/post/:post_id/remove-comment/:id",
+  authorization,
+  deleteComment
+);
 
 export default router;

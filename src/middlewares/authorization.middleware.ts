@@ -2,6 +2,10 @@ import jwt from "jsonwebtoken";
 import { envConfig } from "../config/envconfig.config.ts";
 import type { Request, Response, NextFunction } from "express";
 
+interface jwtPayload {
+  id: string;
+}
+
 const authorization = async (
   req: Request,
   res: Response,
@@ -19,7 +23,8 @@ const authorization = async (
     const decoded = jwt.verify(
       token as string,
       process.env.JWT_SECRET as string
-    );
+    ) as jwtPayload;
+    (req as any).user = { id: (decoded as any).userId };
     next();
   } catch (err: any) {
     res

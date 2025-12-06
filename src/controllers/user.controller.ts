@@ -7,13 +7,13 @@ import { envConfig } from "../config/envconfig.config.ts";
 // Create user
 const signUp = async (req: Request, res: Response) => {
   try {
-    const { user_name, email, password, retypePassword } = req.body;
-    if (!user_name || !email || !password || !retypePassword) {
+    const { user_name, email, password, retype_password } = req.body;
+    if (!user_name || !email || !password || !retype_password) {
       return res
         .status(400)
         .json({ message: "make sure you fill all the required fields." });
     }
-    if (password !== retypePassword) {
+    if (password !== retype_password) {
       return res.status(400).json({
         message: "the retype password should be the same with password.",
       });
@@ -41,8 +41,8 @@ const signUp = async (req: Request, res: Response) => {
 // Login form
 const logIn = async (req: Request, res: Response) => {
   try {
-    const { email, password, retype_password } = req.body;
-    if (!email || !password || !retype_password) {
+    const { email, password } = req.body;
+    if (!email || !password) {
       return res.status(400).json({
         message:
           "make sure you fill the email and password and retype password fields.",
@@ -51,11 +51,6 @@ const logIn = async (req: Request, res: Response) => {
     const find_user = await User.findOne({ email });
     if (!find_user) {
       return res.status(404).json({ message: "User not found." });
-    }
-    if (password !== retype_password) {
-      return res.status(400).json({
-        message: "the retype password should be the same with password.",
-      });
     }
     const password_validation = await bcrypt.compare(
       password,
@@ -83,7 +78,7 @@ const logIn = async (req: Request, res: Response) => {
 const editUser = async (req: Request, res: Response) => {
   try {
     const user_id = req.params.id;
-    const { name, email, password, retypePassword } = req.body;
+    const { user_name, email, password, retype_password } = req.body;
     // check if the user is exist
     const find_user = await User.findById(user_id);
     if (!find_user) {
@@ -92,16 +87,16 @@ const editUser = async (req: Request, res: Response) => {
         .json({ message: "User not found, try another one." });
     }
     // update the name and email
-    if (name) find_user.user_name = name;
+    if (user_name) find_user.user_name = user_name;
     if (email) find_user.email = email;
     // check if the password is edited and if it's right or not
     if (password) {
-      if (!retypePassword) {
+      if (!retype_password) {
         return res
           .status(400)
           .json({ message: "please retype password again." });
       }
-      if (password !== retypePassword) {
+      if (password !== retype_password) {
         return res.status(400).json({
           message: "please retyped password is the same with password.",
         });

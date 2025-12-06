@@ -43,5 +43,6 @@
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "emitDeclarationOnly": true
-  }
+  },
+  "include": ["types/express-session.d.ts", "src/types/express-session.d.ts"]
 }

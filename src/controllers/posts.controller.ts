@@ -1,9 +1,11 @@
 import type { Request, Response } from "express";
 import Posts from "../models/posts.model.ts";
 import Comment from "../models/comments.model.ts";
+
 const createPost = async (req: Request, res: Response) => {
   try {
-    const { title, short_desc, content, author } = req.body;
+    const { title, short_desc, content } = req.body;
+    const author = (req as any).user.id;
     if (!title || !short_desc || !content) {
       return res.status(400).json({
         message: "make sure you put title and short description and content.",
@@ -13,7 +15,7 @@ const createPost = async (req: Request, res: Response) => {
       title,
       short_desc,
       content,
-      author: (req as any).user.id,
+      author,
     });
     res.status(200).json({ message: "Post created.", post: create_post });
   } catch (err: any) {
@@ -46,14 +48,13 @@ const editPost = async (req: Request, res: Response) => {
 const deletePost = async (req: Request, res: Response) => {
   try {
     const post_id = req.params.id;
-    const find_post = await Posts.findById(post_id);
+    const find_post = await Posts.findByIdAndDelete(post_id);
     if (!find_post) {
       return res.status(404).json({ message: "Can't find post, try again." });
     }
-    const delete_post = find_post.deleteOne();
     res
       .status(200)
-      .json({ message: "Post deleted succesfully.", post: delete_post });
+      .json({ message: "Post deleted succesfully.", post: find_post.id });
   } catch (err: any) {
     res
       .status(500)
