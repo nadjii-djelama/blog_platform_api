@@ -1,16 +1,17 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { sessionMiddleware } from "./middlewares/session.middleware.ts";
 import { envConfig } from "./config/envconfig.config.ts";
-import db_conection from "./config/dbconnection.config.ts";
 
 // Database connection
+import db_conection from "./config/dbconnection.config.ts";
 await db_conection();
 
 const app = express();
 
-// session middleware
+// import Midllewares
+import { sessionMiddleware } from "./middlewares/session.middleware.ts";
+import { arcjetMiddle } from "./middlewares/arcjet.middleware.ts";
 
 // Globally middlewares
 app.use(express.json());
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(cookieParser());
 app.use(sessionMiddleware);
+app.use(arcjetMiddle);
 
 // Import Routes
 import userRoute from "./routes/user.route.ts";
