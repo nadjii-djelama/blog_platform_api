@@ -1,20 +1,28 @@
 import mongoose from "mongoose";
-const user_schema = new mongoose.Schema({
-  user_name: {
-    type: String,
-    required: true,
-    minLength: 5,
-    maxLength: 15,
+const user_schema = new mongoose.Schema(
+  {
+    user_name: {
+      type: String,
+      required: true,
+      minLength: 5,
+      maxLength: 15,
+    },
+    email: {
+      type: String,
+      required: true,
+    },
+    password: {
+      type: String,
+      required: true,
+      minLength: 5,
+    },
+    role: {
+      type: String,
+      enum: ["admin", "reader", "author"],
+      default: "reader",
+    },
   },
-  email: {
-    type: String,
-    required: true,
-  },
-  password: {
-    type: String,
-    required: true,
-    minLength: 5,
-  },
-});
+  { timestamps: true }
+);
 
 export default mongoose.model("User", user_schema);

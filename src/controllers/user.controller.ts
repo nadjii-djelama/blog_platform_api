@@ -7,8 +7,8 @@ import { envConfig } from "../config/envconfig.config.ts";
 // Create user
 const signUp = async (req: Request, res: Response) => {
   try {
-    const { user_name, email, password, retype_password } = req.body;
-    if (!user_name || !email || !password || !retype_password) {
+    const { user_name, email, password, retype_password, role } = req.body;
+    if (!user_name || !email || !password || !retype_password || !role) {
       return res
         .status(400)
         .json({ message: "make sure you fill all the required fields." });
@@ -18,6 +18,14 @@ const signUp = async (req: Request, res: Response) => {
         message: "the retype password should be the same with password.",
       });
     }
+    if (role === "admin") {
+      const adminExists = await User.findOne({ role: "admin" });
+      if (adminExists) {
+        return res.status(403).json({
+          message: "You can't get the admin user again.",
+        });
+      }
+    }
     const find_user = await User.findOne({ email });
     if (find_user) {
       return res.status(409).json({ message: "User already exist." });
@@ -26,6 +34,7 @@ const signUp = async (req: Request, res: Response) => {
     const created_user = await User.create({
       user_name,
       email,
+      role,
       password: hash_password,
     });
     return res
@@ -144,4 +153,22 @@ const getSpecificUser = async (req: Request, res: Response) => {
   }
 };
 
-export { signUp, editUser, getUsers, getSpecificUser, logIn };
+// delete user
+const deleteUser = async (req: Request, res: Response) => {
+  try {
+    const user_id = req.params.id;
+    if (!user_id)
+      return res.status(401).json({ message: "provide a valid user ID." });
+    const find_user = await User.findByIdAndDelete(user_id);
+    if (!find_user)
+      return res
+        .status(404)
+        .json({ message: "user doesn't exist, try again." });
+    res.status(200).json({ message: "User deleted.", user: find_user.id });
+  } catch (err: any) {
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: err.message });
+  }
+};
+export { signUp, editUser, getUsers, deleteUser, getSpecificUser, logIn };

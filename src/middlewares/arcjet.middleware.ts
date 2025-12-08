@@ -1,5 +1,5 @@
 import { isSpoofedBot } from "@arcjet/inspect";
-import { aj } from "../config/arcjet.config";
+import { aj } from "../config/arcjet.config.ts";
 import type { Request, Response, NextFunction } from "express";
 
 const arcjetMiddle = async (
