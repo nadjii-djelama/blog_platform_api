@@ -69,7 +69,7 @@ const logIn = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Invalid credeantials." });
     }
     const token = await jwt.sign(
-      { userId: find_user._id, email: find_user.email },
+      { userId: find_user._id, email: find_user.email, role: find_user.role },
       process.env.JWT_SECRET as string,
       { expiresIn: "1d" }
     );
